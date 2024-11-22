@@ -28,7 +28,7 @@ pub fn withdraw(ctx: Context<Withdraw>, bump: u8) -> Result<()> {
     }
 
     // calculate pending reward
-    let pending_reward = user_info.accumulated_reward(staking_info.interest_rate);
+    let pending_reward = user_info.accumulated_reward(&staking_info);
 
     // Transfer token to staked user
     let withdrawable_amount = user_info.staked_amount + pending_reward;
@@ -46,8 +46,7 @@ pub fn withdraw(ctx: Context<Withdraw>, bump: u8) -> Result<()> {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let seeds = &[STAKING_SEED, &[bump]];
         let signer_seeds = &[&seeds[..]];
-        let cpi_context =
-            CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+        let cpi_context = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
         transfer_checked(
             cpi_context,
             withdrawable_amount,
@@ -73,7 +72,7 @@ pub fn claim_reward(ctx: Context<ClaimReward>, bump: u8) -> Result<()> {
     }
 
     // calculate pending reward
-    let pending_reward = user_info.accumulated_reward(staking_info.interest_rate);
+    let pending_reward = user_info.accumulated_reward(&staking_info);
     if pending_reward > 0 {
         // Transfer token to staked user
         let cpi_accounts = TransferChecked {
@@ -89,8 +88,7 @@ pub fn claim_reward(ctx: Context<ClaimReward>, bump: u8) -> Result<()> {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let seeds = &[STAKING_SEED, &[bump]];
         let signer_seeds = &[&seeds[..]];
-        let cpi_context =
-            CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+        let cpi_context = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
         transfer_checked(
             cpi_context,
             pending_reward,

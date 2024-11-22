@@ -13,8 +13,8 @@ pub struct StakingInfo {
     pub end_time: i64,
     // Maximum amount of tokens an address can stake
     pub max_token_amount_per_address: u64,
-    // Interest rate per minutes
-    pub interest_rate: f64,
+    // Interest rate (APY) / 10,000 <=> 100%
+    pub interest_rate: u16,
     // Staking pool is active
     pub is_paused: bool,
     // Authority of the staking pool

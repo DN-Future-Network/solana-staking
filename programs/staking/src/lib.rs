@@ -16,7 +16,7 @@ pub mod staking {
     pub fn create_staking_pool(
         ctx: Context<CreateStakingPool>,
         max_token_amount_per_address: u64,
-        interest_rate: f64,
+        interest_rate: u16,
         start_time: i64,
         end_time: i64,
     ) -> Result<()> {

@@ -38,7 +38,7 @@ const USER_SEED = "USER_SEED";
 const DURATION_1_DAY = new BN(1000).mul(new BN(60 * 60 * 24));
 const STAKING_START_TIME = new BN(Date.now()).add(DURATION_1_DAY);
 const STAKING_END_TIME = STAKING_START_TIME.add(DURATION_1_DAY);
-const STAKING_INTEREST_RATE = 0.05; // 5%
+const STAKING_INTEREST_RATE = new BN(1000); // 10%
 const STAKING_MAX_DEPOSIT_AMOUNT_PER_USER = TOKEN_1000;
 
 describe("staking", async () => {
@@ -200,7 +200,7 @@ describe("staking", async () => {
       await programStaking.methods
         .createStakingPool(
           STAKING_MAX_DEPOSIT_AMOUNT_PER_USER,
-          STAKING_INTEREST_RATE,
+          STAKING_INTEREST_RATE.toNumber(),
           STAKING_START_TIME,
           STAKING_END_TIME
         )
@@ -226,7 +226,9 @@ describe("staking", async () => {
           STAKING_MAX_DEPOSIT_AMOUNT_PER_USER
         )
       ).to.be.true;
-      expect(stakingInfoData.interestRate).to.equal(STAKING_INTEREST_RATE);
+      expect(stakingInfoData.interestRate).to.equal(
+        STAKING_INTEREST_RATE.toNumber()
+      );
       expect(stakingInfoData.startTime.eq(STAKING_START_TIME)).to.be.true;
       expect(stakingInfoData.endTime.eq(STAKING_END_TIME)).to.be.true;
 
@@ -368,6 +370,20 @@ describe("staking", async () => {
         TOKEN_2022_PROGRAM_ID
       );
 
+      const userInfoData = await programStaking.account.userInfo.fetch(
+        PDA_user1
+      );
+      const stakingInfoData = await programStaking.account.stakingInfo.fetch(
+        PDA_stakingInfo
+      );
+      const elapsed_time = stakingInfoData.endTime
+        .sub(userInfoData.lastClaimedRewardAt)
+        .div(new BN(1000));
+      const reward_expected = userInfoData.stakedAmount
+        .mul(STAKING_INTEREST_RATE)
+        .mul(elapsed_time)
+        .div(new BN(60 * 60 * 24 * 365 * 10000)); //(self.staked_amount as f64) * (((rate * seconds) / 31536000.0));
+
       // Set current time to start time
       const currentClock = await banksClient.getClock();
       context.setClock(
@@ -400,12 +416,12 @@ describe("staking", async () => {
 
       expect(
         (ATA_user1_after.amount - ATA_user1_before.amount).toString()
-      ).to.equal("100013698");
+      ).to.equal(reward_expected.add(userInfoData.stakedAmount).toString());
       expect(
         (
           ATA_stakingVault_before.amount - ATA_stakingVault_after.amount
         ).toString()
-      ).to.equal("100013698");
+      ).to.equal(reward_expected.add(userInfoData.stakedAmount).toString());
 
       try {
         await connection.getAccountInfo(PDA_user1);

@@ -1,4 +1,7 @@
 use anchor_lang::prelude::*;
+use std::cmp::min;
+
+use super::StakingInfo;
 
 #[account]
 #[derive(Default)]
@@ -11,15 +14,19 @@ pub struct UserInfo {
 }
 
 impl UserInfo {
-    pub fn accumulated_reward(&self, rate: f64) -> u64 {
+    pub fn accumulated_reward(&self, staking_info: &StakingInfo) -> u64 {
         if self.staked_amount == 0 {
             return 0;
         }
 
-        let now = Clock::get().unwrap().unix_timestamp;
-        let elapsed_time = (now - self.last_claimed_reward_at) as f64;
-        let seconds = elapsed_time / 1000.0;
-        let reward = (self.staked_amount as f64) * (((rate * seconds) / 31536000.0));
-        self.pending_reward + (reward as u64)
+        let min_time = min(Clock::get().unwrap().unix_timestamp, staking_info.end_time);
+        if min_time <= self.last_claimed_reward_at {
+            return 0;
+        }
+
+        let elapsed_time = (min_time - self.last_claimed_reward_at) as u64 / 1000;
+        let reward = (self.staked_amount * elapsed_time * (staking_info.interest_rate as u64))
+            / (3600 * 24 * 365 * 10000);
+        self.pending_reward + reward
     }
 }

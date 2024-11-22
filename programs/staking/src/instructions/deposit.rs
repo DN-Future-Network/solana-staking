@@ -13,7 +13,10 @@ pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
     let staking_info = &mut ctx.accounts.staking_info;
     let user_info = &mut ctx.accounts.user_info;
     let now = Clock::get().unwrap().unix_timestamp;
-    msg!("Expected from_associated_token_account: {}", ctx.accounts.from_associated_token_account.key());
+    msg!(
+        "Expected from_associated_token_account: {}",
+        ctx.accounts.from_associated_token_account.key()
+    );
 
     // get time and compare with start and end time
     if staking_info.start_time > now {
@@ -42,7 +45,7 @@ pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
     }
 
     // Update pending reward
-    user_info.pending_reward = user_info.accumulated_reward(staking_info.interest_rate);
+    user_info.pending_reward = user_info.accumulated_reward(&staking_info);
 
     // Update the user info
     user_info.holder = ctx.accounts.staker.key();
@@ -51,7 +54,11 @@ pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
 
     // Transfer token to staking vault
     let cpi_accounts = TransferChecked {
-        from: ctx.accounts.from_associated_token_account.to_account_info().clone(),
+        from: ctx
+            .accounts
+            .from_associated_token_account
+            .to_account_info()
+            .clone(),
         mint: ctx.accounts.mint_account.to_account_info().clone(),
         to: ctx.accounts.staking_vault.to_account_info().clone(),
         authority: ctx.accounts.staker.to_account_info(),
