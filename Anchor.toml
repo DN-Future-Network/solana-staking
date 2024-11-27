@@ -4,9 +4,13 @@
 resolution = true
 skip-lint = false
 
+[programs.devnet]
+staking = "n3CrsB6yrBvta7x28AHJhsGz2oXdyVyfn8ZmhYKAmh4"
+token = "9SjpPWQBs3P5CgSqUBqWZmeq4PqcdYi8mJiPDqAaRnf5"
+
 [programs.localnet]
-staking = "6TqNSyeW2fN4vBzFbJt3KnAkgdCvonvZBbJaLWYHAjJ8"
-token = "CpiPuDgfgkrthUEwwhQbbpLeik1DZ4PvnQ6yufLugSPe"
+staking = "n3CrsB6yrBvta7x28AHJhsGz2oXdyVyfn8ZmhYKAmh4"
+token = "9SjpPWQBs3P5CgSqUBqWZmeq4PqcdYi8mJiPDqAaRnf5"
 
 [registry]
 url = "https://api.apr.dev"

@@ -2,11 +2,14 @@
 // single deploy script that's invoked from the CLI, injecting a provider
 // configured from the workspace's Anchor.toml.
 
-const anchor = require("@coral-xyz/anchor");
+import * as anchor from "@coral-xyz/anchor";
+import { Program, Provider } from "@coral-xyz/anchor";
+import { Staking } from "../target/types/staking";
 
-module.exports = async function (provider) {
+module.exports = async function (provider: Provider) {
   // Configure client to use the provider.
   anchor.setProvider(provider);
 
-  // Add your deploy script here.
+  const programStaking = anchor.workspace.Staking as Program<Staking>;
+  console.log("Deployed program account", programStaking.programId);
 };

@@ -10,6 +10,8 @@
     "@solana/spl-token": "^0.4.9",
     "@solana/web3.js": "^1.95.4",
     "anchor-bankrun": "^0.5.0",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
     "solana-bankrun": "^0.4.0"
   },
   "devDependencies": {
